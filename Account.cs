@@ -25,14 +25,27 @@ public class Account
 
     public static void CreateAccount()
     {
-        int index = 1000;
-        if (List.Count != 0)
+        string[] data = File.ReadAllLines("../../../banklogin.csv");
+        int findId = data[0].IndexOf(':') + 2;
+        string accountId = data[0].Substring(findId);
+        Console.WriteLine(accountId);
+
+        int index;
+
+        if (int.TryParse(accountId, out int id))
         {
-            foreach (Account Account in List)
+            index = id;
+
+            if (index == id)
             {
                 index++;
             }
         }
+        else
+        {
+            throw new Exception("ID not found");
+        }
+
         Console.Write("Firstname: ");
         string firstname = Console.ReadLine();
         Console.Clear();
