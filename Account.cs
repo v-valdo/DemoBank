@@ -25,42 +25,51 @@ public class Account
 
     public static void CreateAccount()
     {
-        string[] data = File.ReadAllLines("../../../banklogin.csv");
-        int findId = data[0].IndexOf(':') + 2;
-        string accountId = data[0].Substring(findId);
-        Console.WriteLine(accountId);
+        int AccountID = GenerateID();
+        string firstname = string.Empty;
+        string lastname = string.Empty;
+        string password = string.Empty;
 
-        int index;
 
-        if (int.TryParse(accountId, out int id))
+        while (true)
         {
-            index = id;
+            Console.Write("Firstname: ");
 
-            if (index == id)
+            firstname = Console.ReadLine();
+
+            if (ValidFormat(firstname))
             {
-                index++;
+                break;
             }
         }
-        else
+        Console.Clear();
+        while (true)
         {
-            throw new Exception("ID not found");
-        }
+            Console.Write("Last Name: ");
 
-        Console.Write("Firstname: ");
-        string firstname = Console.ReadLine();
+            lastname = Console.ReadLine();
+
+            if (ValidFormat(lastname))
+            {
+                break;
+            }
+        }
         Console.Clear();
-        Console.Write("Last Name: ");
-        string lastname = Console.ReadLine();
-        Console.Clear();
-        string password = string.Empty;
         while (true)
         {
             Console.Clear();
-            Console.Write("Password: ");
-            password = Console.ReadLine();
+            while (true)
+            {
+                Console.Write("Password: ");
+                password = Console.ReadLine();
+                if (ValidFormat(password, true))
+                {
+                    break;
+                }
+            }
             Console.Clear();
             Console.Write("Enter password again: ");
-            string password2 = Console.ReadLine();
+            string? password2 = Console.ReadLine();
             if (password != password2)
             {
                 Console.WriteLine("Passwords don't match");
@@ -70,8 +79,64 @@ public class Account
                 break;
             }
         }
+        Account newAccount = new Account(AccountID, firstname, lastname, 500, password);
+        File.AppendAllTextAsync("../../../banklogin.csv", $"ACCOUNT ID: {AccountID}\nPASSWORD: {password}\nFIRST NAME: {firstname}\nLAST NAME: {lastname}\nDATE CREATED: {newAccount.dateCreated}\n***********\n");
+        Console.WriteLine($"Account Created With ID {AccountID}!");
+    }
 
-        Account newAccount = new Account(index, firstname, lastname, 500, password);
-        File.AppendAllTextAsync("../../../banklogin.csv", $"ACCOUNT ID: {index}\nPASSWORD: {password}\nFIRST NAME: {firstname}\nLAST NAME: {lastname}\nDATE CREATED: {newAccount.dateCreated}\n***********\n");
+    public static int GenerateID()
+    {
+        int index = 1000;
+        string[] data = File.ReadAllLines("../../../banklogin.csv");
+        for (int i = 0; i < data.Length; i += 6)
+        {
+            int findId = data[i].IndexOf(':') + 2;
+            string accountId = data[i].Substring(findId);
+            if (int.TryParse(accountId, out int id))
+            {
+                id++;
+                index = id;
+            }
+            else
+            {
+                throw new Exception("ID not found");
+            }
+        }
+        return index;
+    }
+
+    public static bool ValidFormat(string input)
+    {
+        if (input.Contains(' ') || !input.All(Char.IsLetter) || input == "")
+        {
+            Console.WriteLine("Invalid input. Letters only, no empty spaces");
+            return false;
+        }
+        else if (input.Length == 1)
+        {
+            Console.WriteLine("Too short, 1 letter is not allowed");
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+    public static bool ValidFormat(string input, bool IsPassword)
+    {
+        if (IsPassword)
+        {
+            if (input.Length < 8 || input.Contains(' '))
+            {
+                Console.WriteLine("Password must be more than 8 characters & cannot contain whitespaces");
+                return false;
+            }
+            else if (!input.Any(Char.IsDigit))
+            {
+                Console.WriteLine("Password must contain at least one digit");
+                return false;
+            }
+        }
+        return true;
     }
 }
